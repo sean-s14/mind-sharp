@@ -16,8 +16,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function AddWordPage() {
+  const { toast } = useToast();
   const [word, setWord] = useState("");
   const [debouncedWord] = useDebounce(word, 500);
   const [openDialog, setOpenDialog] = useState(false);
@@ -55,7 +57,7 @@ export default function AddWordPage() {
             >
               <h2 className="text-xl font-semibold">Homonym {index + 1}</h2>
               <ul className="pl-4">
-                {word.shortdef.map((definition: string, index: number) => (
+                {word?.shortdef?.map((definition: string, index: number) => (
                   <li key={index} className="mt-2">
                     <h3 className="text-lg">Definition {index + 1}</h3>
                     <p className="pl-4">{capitalise(definition)}</p>
@@ -79,10 +81,24 @@ export default function AddWordPage() {
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter className="sm:justify-center">
-              <AlertDialogCancel onClick={() => setOpenDialog(false)}>
+              <AlertDialogCancel
+                onClick={() => {
+                  setOpenDialog(false);
+                }}
+              >
                 Cancel
               </AlertDialogCancel>
-              <AlertDialogAction onClick={() => setOpenDialog(false)}>
+              <AlertDialogAction
+                onClick={() => {
+                  setOpenDialog(false);
+
+                  // TODO: Update below toast to display only after success/failure response
+                  toast({
+                    title: `Word Added`,
+                    description: `New word "${word}" added to vocabulary builder`,
+                  });
+                }}
+              >
                 Add
               </AlertDialogAction>
             </AlertDialogFooter>
