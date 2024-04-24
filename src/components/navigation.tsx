@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/navigation-menu";
 import { ModeToggle } from "@/components/theme-toggle";
 import Link from "next/link";
+import { SignIn } from "@/components/auth/sign-in";
+import UserOrSignIn from "./auth/user-or-sign-in";
 
 export default function Navigation() {
   return (
@@ -39,7 +41,10 @@ export default function Navigation() {
           </NavigationMenuItem>
         </NavigationMenuList>
       </NavigationMenu>
-      <ModeToggle />
+      <div className="flex gap-2 items-center">
+        <UserOrSignIn />
+        <ModeToggle />
+      </div>
     </nav>
   );
 }
