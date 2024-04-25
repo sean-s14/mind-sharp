@@ -17,6 +17,22 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
+import { useFormState, useFormStatus } from "react-dom";
+import { addWord } from "../actions";
+import { useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+const initialState = {
+  message: "",
+  id: null,
+  uuid: null,
+};
 
 export default function AddWordPage() {
   const { toast } = useToast();
@@ -24,12 +40,38 @@ export default function AddWordPage() {
   const [debouncedWord] = useDebounce(word, 500);
   const [openDialog, setOpenDialog] = useState(false);
   const [choice, setChoice] = useState("");
+  const [state, formAction] = useFormState(addWord, initialState);
+  const { pending } = useFormStatus();
+  const [id, setId] = useState("");
+  const [uuid, setUuid] = useState("");
 
   const { data: wordData, isLoading } = useQuery({
     queryKey: [debouncedWord],
     queryFn: () => fetchWord(debouncedWord),
     staleTime: 1000 * 60 * 60 * 24, // 1 day
   });
+
+  useEffect(() => {
+    setChoice("");
+    setId("");
+    setUuid("");
+    setOpenDialog(false);
+
+    if ("message" in state)
+      if (state.message === "success") {
+        toast({
+          title: `New Word Added`,
+          description: `New word "${word}" added to vocabulary builder`,
+        });
+      } else {
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: state.message,
+        });
+      }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state]);
 
   return (
     <div className="flex flex-col items-center py-10">
@@ -47,64 +89,77 @@ export default function AddWordPage() {
       )}
       <ul className="w-[640px] max-w-[90%]">
         {wordData?.map((word: any, index: number) => (
-          <li key={index} className="mt-4 border border-zinc-600 rounded-lg">
+          <li key={index} className="mt-4">
             <button
-              className="p-4 w-full rounded-lg flex flex-col items-start text-left hover:bg-zinc-600"
               onClick={() => {
                 setChoice("Homonym " + (index + 1));
+                setId(word.meta.id);
+                setUuid(word.meta.uuid);
                 setOpenDialog(true);
               }}
             >
-              <h2 className="text-xl font-semibold">Homonym {index + 1}</h2>
-              <ul className="pl-4">
-                {word?.shortdef?.map((definition: string, index: number) => (
-                  <li key={index} className="mt-2">
-                    <h3 className="text-lg">Definition {index + 1}</h3>
-                    <p className="pl-4">{capitalise(definition)}</p>
-                  </li>
-                ))}
-              </ul>
+              <Card className="dark:hover:bg-zinc-800 hover:bg-zinc-200 text-left">
+                <CardHeader>
+                  <CardTitle className="text-xl">Homonym {index + 1}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="pl-4 flex flex-col gap-4">
+                    {word?.shortdef?.map(
+                      (definition: string, index: number) => (
+                        <li key={index}>
+                          <CardTitle className="text-lg">
+                            Definition {index + 1}
+                          </CardTitle>
+                          <CardDescription className="text-md mt-1 pl-4">
+                            {capitalise(definition)}
+                          </CardDescription>
+                        </li>
+                      )
+                    )}
+                  </ul>
+                </CardContent>
+              </Card>
             </button>
           </li>
         ))}
       </ul>
-      {openDialog && (
-        <AlertDialog open={openDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>
-                Are you sure you want to add &#34;{choice}&#34;?
-              </AlertDialogTitle>
-              <AlertDialogDescription>
-                This action will add &#34;{choice}&#34; of the word &#34;{word}
-                &#34; to your vocabulary builder
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter className="sm:justify-center">
-              <AlertDialogCancel
-                onClick={() => {
-                  setOpenDialog(false);
-                }}
-              >
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                onClick={() => {
-                  setOpenDialog(false);
 
-                  // TODO: Update below toast to display only after success/failure response
-                  toast({
-                    title: `Word Added`,
-                    description: `New word "${word}" added to vocabulary builder`,
-                  });
-                }}
+      <AlertDialog open={openDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              Are you sure you want to add &#34;{choice}&#34;?
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              This action will add &#34;{choice}&#34; of the word &#34;{word}
+              &#34; to your vocabulary builder
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="sm:justify-center">
+            <AlertDialogCancel
+              onClick={() => {
+                setOpenDialog(false);
+                setChoice("");
+                setId("");
+                setUuid("");
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <form action={formAction}>
+              <input type="hidden" name="id" value={id} />
+              <input type="hidden" name="uuid" value={uuid} />
+              <AlertDialogAction
+                type="submit"
+                disabled={pending}
+                aria-disabled={pending}
               >
                 Add
               </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      )}
+            </form>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
