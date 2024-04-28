@@ -85,3 +85,71 @@ export async function addWord(prevState: any, formData: FormData) {
 
   return { message: "success" };
 }
+
+export async function getDailyWord() {
+  const today = new Date();
+  const start = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate()
+  );
+  const end = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    today.getDate() + 1
+  );
+
+  const session = await auth();
+
+  try {
+    const dailyWordMeta = await prisma.userWordMeta.findFirstOrThrow({
+      where: {
+        userId: session?.user?.id,
+        daily: {
+          gte: start,
+          lt: end,
+        },
+      },
+    });
+
+    const dailyWord = await prisma.word.findUniqueOrThrow({
+      where: {
+        id: dailyWordMeta.wordId,
+      },
+    });
+
+    return dailyWord;
+  } catch (e) {
+    try {
+      const userWordMeta = await prisma.userWordMeta.findFirstOrThrow({
+        orderBy: {
+          views: "asc", // Order by views in ascending order (lowest to highest)
+        },
+        take: 1, // Take the first result (the one with the lowest views)
+      });
+
+      // Update 'daily' field to todays date and increment views by 1
+      await prisma.userWordMeta.update({
+        where: {
+          id: userWordMeta.id,
+        },
+        data: {
+          daily: today,
+          views: {
+            increment: 1,
+          },
+        },
+      });
+
+      const dailyWord = await prisma.word.findUniqueOrThrow({
+        where: {
+          id: userWordMeta.wordId,
+        },
+      });
+
+      return dailyWord;
+    } catch (e) {
+      return { message: "Add more words to vocabulary builder" };
+    }
+  }
+}

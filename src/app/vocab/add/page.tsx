@@ -58,7 +58,8 @@ export default function AddWordPage() {
     setOpenDialog(false);
 
     if ("message" in state)
-      if (state.message === "success") {
+      if (state.message === "") {
+      } else if (state.message === "success") {
         toast({
           title: `New Word Added`,
           description: `New word "${word}" added to vocabulary builder`,

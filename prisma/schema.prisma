@@ -11,11 +11,11 @@ datasource db {
 }
 
 model Word {
-  id        String    @id
-  uuid      String    @unique
-  createdAt DateTime  @default(now()) @map(name: "created_at")
-  updatedAt DateTime  @updatedAt @map(name: "updated_at")
-  userWordMeta UserWordMeta[]
+  id            String    @id
+  uuid          String    @unique
+  createdAt     DateTime  @default(now()) @map(name: "created_at")
+  updatedAt     DateTime  @updatedAt @map(name: "updated_at")
+  userWordMeta  UserWordMeta[]
 }
 
 model UserWordMeta {
@@ -25,6 +25,9 @@ model UserWordMeta {
   word      Word      @relation(fields: [wordId], references: [id])
   wordId    String
   views     Int       @default(0)
+  daily     DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   @@unique([userId, wordId])
 }
 
@@ -39,8 +42,8 @@ model User {
   // Optional for WebAuthn support
   Authenticator Authenticator[]
  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
   words         UserWordMeta[]
   @@map(name: "users")
 }
