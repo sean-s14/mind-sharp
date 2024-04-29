@@ -24,7 +24,7 @@ export default async function VocabularyBuilder() {
             </Link>
           </Button>
           <Button className="dark:text-zinc-300 bg-emerald-500 hover:bg-emerald-600 dark:bg-emerald-600 dark:hover:bg-emerald-500">
-            <Link href="/vocab/list" className="text-lg font-semibold">
+            <Link href="/vocab/all" className="text-lg font-semibold">
               View All Words
             </Link>
           </Button>

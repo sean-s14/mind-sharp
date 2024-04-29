@@ -92,6 +92,7 @@ export default function AddWordPage() {
         {wordData?.map((word: any, index: number) => (
           <li key={index} className="mt-4">
             <button
+              className="w-full"
               onClick={() => {
                 setChoice("Homonym " + (index + 1));
                 setId(word.meta.id);

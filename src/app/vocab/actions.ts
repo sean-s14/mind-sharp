@@ -153,3 +153,19 @@ export async function getDailyWord() {
     }
   }
 }
+
+export async function fetchAllWords() {
+  const session = await auth();
+
+  try {
+    const allWords = await prisma.userWordMeta.findMany({
+      where: {
+        userId: session?.user?.id,
+      },
+    });
+    return allWords;
+  } catch (e) {
+    if (process.env.NODE_ENV === "development") console.error(e);
+    return { error: "Error retrieving vocabulary collection" };
+  }
+}

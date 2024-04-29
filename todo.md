@@ -1,0 +1,1 @@
+- In /vocab/add when searching for a word that doesn't exist MW API will return a list of suggestions. When this happens display them as options to select from and make another request.
