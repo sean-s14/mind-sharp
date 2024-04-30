@@ -1,28 +1,20 @@
 import { fetchAllWords } from "../actions";
 import { Card, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { getViewColor } from "@/utils/tailwind";
 
 export default async function AllWords() {
   const allWords = await fetchAllWords();
 
-  if ("error" in allWords) return null; // TODO: Updated this with error message or redirect
-
-  const viewColor = (views: number) => {
-    let color = "";
-
-    if (views > 2) {
-      color = " bg-cyan-400";
-    } else if (views > 1) {
-      color = " bg-emerald-400";
-    } else if (views > 0) {
-      color = " bg-amber-400";
-    }
-
-    if (views > 0) {
-      color += " text-zinc-800 font-bold";
-    }
-
-    return color;
-  };
+  if ("error" in allWords) {
+    return <p className="text-red-500">{allWords.error}</p>;
+  } else if (allWords.length === 0) {
+    return (
+      <div className="flex flex-col items-center py-5">
+        <p>No Words Available</p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center py-10">
@@ -33,16 +25,24 @@ export default async function AllWords() {
             index: number
           ) => (
             <li key={wordId + "_" + index} className="min-w-40">
-              <Card className="flex justify-between p-2 rounded-lg gap-2">
-                <CardTitle className="text-xl font-normal">{wordId}</CardTitle>
-                <div
-                  className={`px-2 flex items-center justify-center bg-zinc-600 rounded-lg ${viewColor(
-                    views
-                  )}`}
-                >
-                  {views}
-                </div>
-              </Card>
+              <Link
+                href={`/vocab/view/${wordId}`}
+                className="text-lg font-semibold"
+              >
+                <Card className="flex justify-between p-2 rounded-lg gap-2">
+                  <CardTitle className="text-xl font-normal">
+                    {wordId}
+                  </CardTitle>
+                  <div
+                    className={`px-2 flex items-center justify-center rounded-lg ${getViewColor(
+                      views
+                    )}`}
+                    aria-label="view count"
+                  >
+                    {views}
+                  </div>
+                </Card>
+              </Link>
             </li>
           )
         )}

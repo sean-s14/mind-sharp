@@ -1,17 +1,10 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getDailyWord } from "@/app/vocab/actions";
-import DailyWord from "@/components/vocab/daily-word";
+import Word from "@/components/vocab/word";
 
 export default async function VocabularyBuilder() {
   const dailyWord = await getDailyWord();
-
-  if (process.env.NODE_ENV === "development") {
-    console.log("Daily Word:", dailyWord);
-  }
-
-  // TODO: Update this and add toast
-  if ("message" in dailyWord) return null;
 
   return (
     <div className="flex flex-col items-center py-4">
@@ -30,7 +23,16 @@ export default async function VocabularyBuilder() {
           </Button>
         </div>
       </div>
-      <DailyWord wordId={dailyWord.id} />
+      {"error" in dailyWord ? (
+        <div>
+          <p className="text-red-500">{dailyWord.error}</p>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center">
+          <h2 className="text-2xl font-normal mb-2">Word Of The Day</h2>
+          <Word wordId={dailyWord.id} />
+        </div>
+      )}
     </div>
   );
 }

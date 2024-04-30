@@ -46,6 +46,9 @@ export function mwParser(text: string) {
   // Replace d_link tokens
   text = text.replace(/{d_link\|(.*?)\|(.*?)}/g, "$1");
 
+  // Replace a_link tokens
+  text = text.replace(/{a_link\|(.*?)}/g, "$1");
+
   // Replace sx tokens
   text = text.replace(/{sx\|(.*?)\|(.*?)}/g, "$1");
 

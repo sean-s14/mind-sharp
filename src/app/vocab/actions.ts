@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { z } from "zod";
 import { auth } from "@/auth";
+import { revalidatePath } from "next/cache";
 
 export async function addWord(prevState: any, formData: FormData) {
   const session = await auth();
@@ -39,7 +40,7 @@ export async function addWord(prevState: any, formData: FormData) {
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code !== "P2002") {
-        console.error(e);
+        if (process.env.NODE_ENV === "development") console.error(e);
         return { message: "Failed to add word" };
       }
     }
@@ -70,6 +71,8 @@ export async function addWord(prevState: any, formData: FormData) {
         wordId: userWordMetaData.wordId,
       },
     });
+
+    revalidatePath("/vocab/all");
   } catch (e) {
     if (e instanceof Prisma.PrismaClientKnownRequestError) {
       if (e.code === "P2002") {
@@ -100,6 +103,8 @@ export async function getDailyWord() {
   );
 
   const session = await auth();
+  if (!session?.user?.id)
+    return { error: "You must have an account to view your daily word" };
 
   try {
     const dailyWordMeta = await prisma.userWordMeta.findFirstOrThrow({
@@ -122,6 +127,9 @@ export async function getDailyWord() {
   } catch (e) {
     try {
       const userWordMeta = await prisma.userWordMeta.findFirstOrThrow({
+        where: {
+          userId: session?.user?.id,
+        },
         orderBy: {
           views: "asc", // Order by views in ascending order (lowest to highest)
         },
@@ -149,7 +157,7 @@ export async function getDailyWord() {
 
       return dailyWord;
     } catch (e) {
-      return { message: "Add more words to vocabulary builder" };
+      return { error: "Add more words to vocabulary builder" };
     }
   }
 }
@@ -167,5 +175,53 @@ export async function fetchAllWords() {
   } catch (e) {
     if (process.env.NODE_ENV === "development") console.error(e);
     return { error: "Error retrieving vocabulary collection" };
+  }
+}
+
+export async function deleteWord({ wordId }: { wordId: string }) {
+  const session = await auth();
+
+  try {
+    const word = await prisma.userWordMeta.findFirstOrThrow({
+      where: {
+        wordId: wordId,
+        userId: session?.user?.id,
+      },
+    });
+
+    await prisma.userWordMeta.delete({
+      where: {
+        id: word.id,
+      },
+    });
+
+    revalidatePath("/vocab/all");
+    return { wordId, message: "success", error: "" };
+  } catch (e) {
+    if (process.env.NODE_ENV === "development") console.error(e);
+    return {
+      wordId,
+      message: "",
+      error: `Failed to delete word "${wordId.split(":")[0]}"`,
+    };
+  }
+}
+
+export async function getWordMeta(wordId: string) {
+  const session = await auth();
+
+  try {
+    const word = await prisma.userWordMeta.findFirstOrThrow({
+      where: {
+        wordId: wordId,
+        // The below field is to ensure only the user who owns this object can delete it
+        userId: session?.user?.id,
+      },
+    });
+
+    return word;
+  } catch (e) {
+    if (process.env.NODE_ENV === "development") console.error(e);
+    return { error: "Unable to retrieve selected word" };
   }
 }
