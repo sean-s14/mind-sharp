@@ -225,3 +225,47 @@ export async function getWordMeta(wordId: string) {
     return { error: "Unable to retrieve selected word" };
   }
 }
+
+export async function incrementViews(userWordMetaId: string) {
+  const session = await auth();
+
+  try {
+    const updatedUserWordMeta = await prisma.userWordMeta.update({
+      where: {
+        id: userWordMetaId,
+        userId: session?.user?.id,
+      },
+      data: {
+        views: {
+          increment: 1,
+        },
+      },
+    });
+
+    return updatedUserWordMeta;
+  } catch (e) {
+    return { error: "Unable to update view count" };
+  }
+}
+
+export async function decrementViews(userWordMetaId: string) {
+  const session = await auth();
+
+  try {
+    const updatedUserWordMeta = await prisma.userWordMeta.update({
+      where: {
+        id: userWordMetaId,
+        userId: session?.user?.id,
+      },
+      data: {
+        views: {
+          decrement: 1,
+        },
+      },
+    });
+
+    return updatedUserWordMeta;
+  } catch (e) {
+    return { error: "Unable to update view count" };
+  }
+}

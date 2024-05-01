@@ -2,12 +2,14 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getDailyWord } from "@/app/vocab/actions";
 import Word from "@/components/vocab/word";
+import { Suspense } from "react";
+import WordSkeleton from "@/components/vocab/word-skeleton";
 
 export default async function VocabularyBuilder() {
   const dailyWord = await getDailyWord();
 
   return (
-    <div className="flex flex-col items-center py-4">
+    <div className="flex flex-col items-center py-4 pb-10">
       <div className="flex justify-between min-w-full px-10">
         <h1 className="text-2xl mb-4">Vocabulary Builder</h1>
         <div className="flex flex-col gap-2">
@@ -29,8 +31,10 @@ export default async function VocabularyBuilder() {
         </div>
       ) : (
         <div className="flex flex-col items-center">
-          <h2 className="text-2xl font-normal mb-2">Word Of The Day</h2>
-          <Word wordId={dailyWord.id} />
+          <h2 className="text-2xl font-normal mb-6">Word Of The Day</h2>
+          <Suspense fallback={<WordSkeleton />}>
+            <Word wordId={dailyWord.id} />
+          </Suspense>
         </div>
       )}
     </div>

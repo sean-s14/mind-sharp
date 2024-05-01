@@ -1,6 +1,8 @@
 import Word from "@/components/vocab/word";
+import { Suspense } from "react";
+import WordSkeleton from "@/components/vocab/word-skeleton";
 
-export default async function ViewWordPage({
+export default async function WordDetailPage({
   params,
 }: {
   params: { id: string };
@@ -9,7 +11,9 @@ export default async function ViewWordPage({
 
   return (
     <div className="flex flex-col items-center py-6">
-      <Word wordId={id} />
+      <Suspense fallback={<WordSkeleton />}>
+        <Word wordId={id} />
+      </Suspense>
     </div>
   );
 }

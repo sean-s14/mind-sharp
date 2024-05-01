@@ -10,7 +10,7 @@ import { getWordMeta } from "@/app/vocab/actions";
 import { capitalise } from "@sean14/utils";
 import { mwParser } from "@/utils/mw-parser";
 import DeleteWord from "./deleteWord";
-import { getViewColor } from "@/utils/tailwind";
+import UpdateViews from "./update-views";
 
 export default async function Word({ wordId }: { wordId: string }) {
   const userWordMeta = await getWordMeta(wordId);
@@ -22,14 +22,9 @@ export default async function Word({ wordId }: { wordId: string }) {
     return <div className="text-red-500">{userWordMeta.error}</div>;
 
   return (
-    <Card className="p-4 mt-4 w-[600px] max-w-[90%] relative">
-      <div
-        className={`absolute right-4 px-1.5 rounded ${getViewColor(
-          userWordMeta.views
-        )}`}
-        aria-label="view count"
-      >
-        {userWordMeta.views}
+    <Card className="p-4 w-[600px] max-w-[90%] relative">
+      <div className="absolute right-4">
+        <UpdateViews userWordMeta={userWordMeta} />
       </div>
       <CardHeader>
         <CardTitle className="text-center text-6xl font-thin mb-8">
