@@ -84,7 +84,7 @@ export default function AddWordPage() {
         onChange={(e) => setWord(e.target.value)}
       />
       {wordData && (
-        <h1 className="text-xl font-medium m-4 w-[600px] max-w-[90%] text-center">
+        <h1 className="text-lg xs:text-xl font-medium m-4 w-[600px] max-w-[90%] text-center">
           Select the homonym of the word you would like to add below &#8681;
         </h1>
       )}
@@ -127,7 +127,7 @@ export default function AddWordPage() {
       </ul>
 
       <AlertDialog open={openDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[90%]">
           <AlertDialogHeader>
             <AlertDialogTitle>
               Are you sure you want to add &#34;{choice}&#34;?
@@ -137,7 +137,7 @@ export default function AddWordPage() {
               &#34; to your vocabulary builder
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="sm:justify-center">
+          <AlertDialogFooter className="items-center justify-center flex flex-row gap-4">
             <AlertDialogCancel
               onClick={() => {
                 setOpenDialog(false);
@@ -145,6 +145,7 @@ export default function AddWordPage() {
                 setId("");
                 setUuid("");
               }}
+              className="m-0"
             >
               Cancel
             </AlertDialogCancel>
@@ -155,6 +156,7 @@ export default function AddWordPage() {
                 type="submit"
                 disabled={pending}
                 aria-disabled={pending}
+                className="w-20 h-8"
               >
                 Add
               </AlertDialogAction>

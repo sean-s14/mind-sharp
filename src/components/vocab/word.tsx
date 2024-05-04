@@ -22,12 +22,12 @@ export default async function Word({ wordId }: { wordId: string }) {
     return <div className="text-red-500">{userWordMeta.error}</div>;
 
   return (
-    <Card className="p-4 w-[600px] max-w-[90%] relative">
-      <div className="absolute right-4">
+    <Card className="p-0 xs:p-4 min-w-[300px] w-[90%] max-w-[600px] relative">
+      <div className="absolute top-4 right-4">
         <UpdateViews userWordMeta={userWordMeta} />
       </div>
       <CardHeader>
-        <CardTitle className="text-center text-6xl font-thin mb-8">
+        <CardTitle className="text-center text-5xl xs:text-6xl font-thin mb-0 xs:mb-8">
           {capitalise(word)}
         </CardTitle>
       </CardHeader>
@@ -102,7 +102,7 @@ export default async function Word({ wordId }: { wordId: string }) {
         </div>
       </CardContent>
       <CardFooter className="flex flex-col">
-        <hr className="w-[90%] my-6" />
+        <hr className="w-[90%] my-4 xs:my-6" />
         <DeleteWord wordId={wordId} />
       </CardFooter>
     </Card>
