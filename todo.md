@@ -1,1 +1,4 @@
 - In /vocab/add when searching for a word that doesn't exist MW API will return a list of suggestions. When this happens display them as options to select from and make another request.
+- Modify getDailyWord in /vocab/actions to display every 12 hours
+- Improve responsivitiy for mobile devices
+- Add tests

@@ -18,20 +18,21 @@ export default async function AllWords() {
 
   return (
     <div className="flex flex-col items-center py-10">
-      <ul className="max-w-[90%] flex flex-wrap gap-2">
+      <ul className="max-w-[90%] flex flex-wrap justify-center gap-2">
         {allWords.map(
           (
             { wordId, views }: { wordId: string; views: number },
             index: number
           ) => (
-            <li key={wordId + "_" + index} className="min-w-40">
+            <li key={wordId + "_" + index} className="min-w-44">
               <Link
                 href={`/vocab/view/${wordId}`}
                 className="text-lg font-semibold"
               >
                 <Card className="flex justify-between p-2 rounded-lg gap-2">
                   <CardTitle className="text-xl font-normal">
-                    {wordId}
+                    {wordId.split(":")[0]}
+                    {wordId.split(":")[1] && ` (${wordId.split(":")[1]})`}
                   </CardTitle>
                   <div
                     className={`px-2 flex items-center justify-center rounded-lg ${getViewColor(

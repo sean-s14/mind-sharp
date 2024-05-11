@@ -1,11 +1,11 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useDebounce } from "use-debounce";
 import { useQuery } from "@tanstack/react-query";
 import { fetchWord } from "@/api/fetchWord";
-import { capitalise } from "@sean14/utils";
+import { capitalise, isArrayOfType } from "@sean14/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,8 +18,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useFormState, useFormStatus } from "react-dom";
-import { addWord } from "../actions";
-import { useEffect } from "react";
+import { addWord } from "@/app/vocab/actions";
 import {
   Card,
   CardContent,
@@ -44,6 +43,7 @@ export default function AddWordPage() {
   const { pending } = useFormStatus();
   const [id, setId] = useState("");
   const [uuid, setUuid] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const { data: wordData, isLoading } = useQuery({
     queryKey: [debouncedWord],
@@ -57,7 +57,7 @@ export default function AddWordPage() {
     setUuid("");
     setOpenDialog(false);
 
-    if ("message" in state)
+    if ("message" in state) {
       if (state.message === "") {
       } else if (state.message === "success") {
         toast({
@@ -71,63 +71,89 @@ export default function AddWordPage() {
           description: state.message,
         });
       }
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
+  useEffect(() => {
+    inputRef.current && inputRef.current.focus();
+  }, [openDialog]);
+
   return (
     <div className="flex flex-col items-center py-10">
-      <Input
-        type="text"
-        placeholder="Search for word"
-        className="w-[640px] max-w-[90%] h-12 text-2xl text-center"
-        value={word}
-        onChange={(e) => setWord(e.target.value)}
-      />
+      <div className="w-[640px] max-w-[90%] relative">
+        <Input
+          type="text"
+          placeholder="Search for word"
+          className="w-full h-12 text-2xl text-center"
+          value={word}
+          onChange={(e) => setWord(e.target.value)}
+          ref={inputRef}
+        />
+        <ul className="w-full absolute">
+          {isArrayOfType(wordData, "string") &&
+            wordData.map((word: string, index: number) => (
+              <li key={word} className="">
+                <Card className="rounded-none hover:dark:bg-zinc-900">
+                  <button
+                    className="w-full text-left py-2 pl-4 text-2xl"
+                    onClick={() => setWord(word)}
+                  >
+                    {word}
+                  </button>
+                </Card>
+              </li>
+            ))}
+        </ul>
+      </div>
       {wordData && (
         <h1 className="text-lg xs:text-xl font-medium m-4 w-[600px] max-w-[90%] text-center">
           Select the homonym of the word you would like to add below &#8681;
         </h1>
       )}
       <ul className="w-[640px] max-w-[90%]">
-        {wordData?.map((word: any, index: number) => (
-          <li key={index} className="mt-4">
-            <button
-              className="w-full"
-              onClick={() => {
-                setChoice("Homonym " + (index + 1));
-                setId(word.meta.id);
-                setUuid(word.meta.uuid);
-                setOpenDialog(true);
-              }}
-            >
-              <Card className="dark:hover:bg-zinc-800 hover:bg-zinc-200 text-left">
-                <CardHeader>
-                  <CardTitle className="text-xl">Homonym {index + 1}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="pl-4 flex flex-col gap-4">
-                    {word?.shortdef?.map(
-                      (definition: string, index: number) => (
-                        <li key={index}>
-                          <CardTitle className="text-lg">
-                            Definition {index + 1}
-                          </CardTitle>
-                          <CardDescription className="text-md mt-1 pl-4">
-                            {capitalise(definition)}
-                          </CardDescription>
-                        </li>
-                      )
-                    )}
-                  </ul>
-                </CardContent>
-              </Card>
-            </button>
-          </li>
-        ))}
+        {isArrayOfType(wordData, "object") &&
+          wordData?.map((word: any, index: number) => (
+            <li key={index} className="mt-4">
+              <button
+                className="w-full"
+                onClick={() => {
+                  setChoice("Homonym " + (index + 1));
+                  setId(word.meta.id);
+                  setUuid(word.meta.uuid);
+                  setOpenDialog(true);
+                }}
+              >
+                <Card className="dark:hover:bg-zinc-800 hover:bg-zinc-200 text-left">
+                  <CardHeader>
+                    <CardTitle className="text-xl">
+                      Homonym {index + 1}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="pl-4 flex flex-col gap-4">
+                      {word?.shortdef?.map(
+                        (definition: string, index: number) => (
+                          <li key={index}>
+                            <CardTitle className="text-lg">
+                              Definition {index + 1}
+                            </CardTitle>
+                            <CardDescription className="text-md mt-1 pl-4">
+                              {capitalise(definition)}
+                            </CardDescription>
+                          </li>
+                        )
+                      )}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </button>
+            </li>
+          ))}
       </ul>
 
       <AlertDialog open={openDialog}>
-        <AlertDialogContent className="max-w-[90%]">
+        <AlertDialogContent className="max-w-[90%] w-fit">
           <AlertDialogHeader>
             <AlertDialogTitle>
               Are you sure you want to add &#34;{choice}&#34;?
